@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
+import axios from 'axios';
 import { FeedItem } from '../models/FeedItem';
 import { requireAuth } from '../../users/routes/auth.router';
 import * as AWS from '../../../../aws';
+import { config } from '../../../../config/config';
 
 const router: Router = Router();
 
@@ -32,6 +34,7 @@ router.patch('/:id', requireAuth, async (req: Request, res: Response) => {
   }
 
   const { caption, url } = req.body;
+
   if (caption) item.caption = caption;
   if (url) item.url = url;
   const savedItem = await item.save();
@@ -69,6 +72,21 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     return res.status(400).send({ message: 'File url is required' });
   }
 
+  const getUrl = AWS.getGetSignedUrl(fileName);
+  const putUrl = AWS.getPutSignedUrl(fileName);
+
+  // filter the image
+  try {
+    await axios.get(
+      `${config.imageFilterUrl}/filteredimage?image_url=${encodeURIComponent(
+        getUrl
+      )}&putimage_url=${encodeURIComponent(putUrl)}`
+    );
+  } catch (err) {
+    console.log(err);
+    return res.sendStatus(500);
+  }
+
   const item = await new FeedItem({
     caption: caption,
     url: fileName
@@ -76,7 +94,8 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
 
   const saved_item = await item.save();
 
-  saved_item.url = AWS.getGetSignedUrl(saved_item.url);
+  saved_item.url = getUrl;
+
   res.status(201).send(saved_item);
 });
 

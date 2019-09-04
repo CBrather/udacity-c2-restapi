@@ -7,5 +7,6 @@ export const config = {
   aws_region: process.env.AWS_REGION,
   aws_profile: 'default',
   aws_media_bucket: process.env.UDAGRAM_MEDIA_BUCKET,
-  jwtSecret: process.env.UDAGRAM_JWT_SECRET
+  jwtSecret: process.env.UDAGRAM_JWT_SECRET,
+  imageFilterUrl: process.env.UDAGRAM_IMAGE_FILTER_URL
 };
