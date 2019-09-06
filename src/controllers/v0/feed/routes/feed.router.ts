@@ -80,7 +80,8 @@ router.post('/', requireAuth, async (req: Request, res: Response) => {
     await axios.get(
       `${config.imageFilterUrl}/filteredimage?image_url=${encodeURIComponent(
         getUrl
-      )}&putimage_url=${encodeURIComponent(putUrl)}`
+      )}&putimage_url=${encodeURIComponent(putUrl)}`,
+      { headers: { authorization: req.headers.authorization } }
     );
   } catch (err) {
     console.log(err);
